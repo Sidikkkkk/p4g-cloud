@@ -20,17 +20,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 17
-      - uses: android-actions/setup-android@v3
-      - name: Build APK
+
+      - name: Build APK Placeholder
         run: |
           echo "Building ${{ inputs.title_id }} mode ${{ inputs.build_mode }}"
           mkdir -p app/build/outputs/apk/debug
-          echo "APK Placeholder - isi build logic lu disini" > app/build/outputs/apk/debug/README.txt
+          echo "Build success for ${{ inputs.title_id }}" > app/build/outputs/apk/debug/README.txt
+          echo "P4G APK Build - ${{ inputs.title_id }} - ${{ inputs.build_mode }}" > app/build/outputs/apk/debug/build-info.txt
+          date >> app/build/outputs/apk/debug/build-info.txt
+          # Nanti disini lu taruh ./gradlew assembleDebug
+
       - uses: actions/upload-artifact@v4
         with:
           name: Persona-4-Golden-APK
