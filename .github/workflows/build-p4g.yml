@@ -10,6 +10,7 @@ on:
         required: true
         type: choice
         options: [fast_patch, full_build]
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -19,12 +20,30 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-      - name: Build Debug APK
+
+      - name: Setup Android SDK
         run: |
-          chmod +x gradlew 2>/dev/null || echo "no wrapper, using gradle"
-          gradle assembleDebug --stacktrace || ./gradlew assembleDebug --stacktrace
+          sudo apt-get update -y
+          sudo apt-get install -y wget unzip
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O /tmp/cmdline.zip
+          mkdir -p $HOME/android-sdk/cmdline-tools
+          unzip -q /tmp/cmdline.zip -d $HOME/android-sdk/cmdline-tools
+          mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
+          export ANDROID_HOME=$HOME/android-sdk
+          export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Build Debug APK
+        env:
+          ANDROID_HOME: /home/runner/android-sdk
+          ANDROID_SDK_ROOT: /home/runner/android-sdk
+        run: |
+          export ANDROID_HOME=/home/runner/android-sdk
+          export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH
+          gradle --version
+          gradle assembleDebug --stacktrace
+
       - uses: actions/upload-artifact@v4
         with:
           name: Persona-4-Golden-APK
